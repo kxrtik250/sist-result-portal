@@ -127,3 +127,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'results' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+CSRF_TRUSTED_ORIGINS = [
+    'https://sist-result-portal-production.up.railway.app',
+    'http://sist-result-portal-production.up.railway.app',
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
