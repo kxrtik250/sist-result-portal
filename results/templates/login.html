@@ -1,0 +1,297 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIST Result Portal — Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            background: #111;
+        }
+        .login-bg {
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Sathyabama_University.jpg/1280px-Sathyabama_University.jpg')
+        center center / cover no-repeat;
+    z-index: 0;
+}
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 14px;
+            padding: 0 0 28px 0;
+            width: 100%;
+            max-width: 430px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Maroon header */
+        .sist-header {
+            background: linear-gradient(135deg, #6b0f0f, #8b1a1a);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .sist-emblem {
+            width: 54px;
+            height: 54px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .sist-text .sist-name {
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .sist-text .sist-sub {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.62rem;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+        .ugc-badge {
+            text-align: center;
+            font-size: 0.68rem;
+            color: #8b1a1a;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 8px 0 4px;
+            border-bottom: 1px solid #f0e0e0;
+            margin: 0 24px 16px;
+        }
+
+        /* Form area */
+        .login-body { padding: 0 28px; }
+        .login-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.84rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .login-subtitle strong { color: #8b1a1a; }
+
+        .lbl {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 5px;
+        }
+        .linp {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            font-size: 0.92rem;
+            color: #222;
+            background: #f5f8ff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            margin-bottom: 14px;
+        }
+        .linp:focus {
+            border-color: #8b1a1a;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(139,26,26,0.1);
+        }
+        .lsel {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 7px;
+            font-size: 0.92rem;
+            color: #222;
+            background: #f5f8ff;
+            margin-bottom: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+        .pw-wrap { position: relative; margin-bottom: 18px; }
+        .pw-wrap .linp { margin-bottom: 0; }
+        .pw-eye {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            font-size: 1rem;
+            padding: 0;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #e87722, #cf6510);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+        .login-btn:hover {
+            background: linear-gradient(135deg, #cf6510, #b55a0d);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(232,119,34,0.4);
+        }
+
+        .login-error {
+            background: #fff0f0;
+            border: 1px solid #f5c2c2;
+            color: #c0392b;
+            padding: 10px 14px;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+        }
+
+        .reg-link {
+            display: block;
+            text-align: center;
+            color: #8b1a1a;
+            font-size: 0.83rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 14px;
+        }
+        .reg-link:hover { color: #e87722; text-decoration: underline; }
+
+        .login-footer {
+            text-align: center;
+            color: #bbb;
+            font-size: 0.74rem;
+            margin-top: 16px;
+        }
+
+        /* Bottom campus strip */
+        .campus-strip {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #8b1a1a, #e87722, #8b1a1a);
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-bg"></div>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <!-- Maroon Header -->
+        <div class="sist-header">
+            <div class="sist-emblem">🎓</div>
+            <div class="sist-text">
+                <div class="sist-name">SATHYABAMA</div>
+                <div class="sist-sub">INSTITUTE OF SCIENCE AND TECHNOLOGY</div>
+                <div class="sist-sub">(DEEMED TO BE UNIVERSITY)</div>
+            </div>
+        </div>
+
+        <!-- UGC Badge -->
+        <div class="ugc-badge">CATEGORY — 1 UNIVERSITY BY UGC</div>
+
+        <div class="login-body">
+            <p class="login-subtitle">
+                Enter your username and Password to access<br>
+                <strong>Student Result Portal</strong>
+            </p>
+
+            {% if error %}
+            <div class="login-error">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <select class="lsel" id="role_sel" onchange="toggleRole()">
+                    <option value="student">Student</option>
+                    <option value="staff">Staff / Admin</option>
+                </select>
+
+                <label class="lbl" id="uname_label">username</label>
+                <input type="text" name="username" class="linp"
+                       id="uname_input"
+                       placeholder="e.g. karthik1" required>
+
+                <label class="lbl">Password</label>
+                <div class="pw-wrap">
+                    <input type="password" name="password" id="pw_inp"
+                           class="linp" placeholder="••••••••••" required>
+                    <button type="button" class="pw-eye"
+                            onclick="togglePw()">👁</button>
+                </div>
+
+                <button type="submit" class="login-btn">LOG IN</button>
+            </form>
+
+            <a href="/register/" class="reg-link">
+                New student? Register here →
+            </a>
+
+            <div class="login-footer">
+                2025 &copy; Sathyabama Result Portal &nbsp;|&nbsp;
+                School of Computing — B.E. CSE R2023
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="campus-strip"></div>
+
+<script>
+function togglePw() {
+    const i = document.getElementById('pw_inp');
+    i.type = i.type === 'password' ? 'text' : 'password';
+}
+function toggleRole() {
+    const role = document.getElementById('role_sel').value;
+    const lbl  = document.getElementById('uname_label');
+    const inp  = document.getElementById('uname_input');
+    if (role === 'staff') {
+        lbl.textContent   = 'Username';
+        inp.placeholder   = 'Enter staff username';
+    } else {
+        lbl.textContent   = 'Register Number';
+        inp.placeholder   = 'e.g. 43110423';
+    }
+}
+</script>
+</body>
+</html>
+{% endblock %}

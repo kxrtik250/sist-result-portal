@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h4 style="font-weight:700;margin:0;">Staff Dashboard</h4>
+        <p style="color:var(--muted);font-size:0.85rem;margin:4px 0 0;">
+            Manage students and results
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        <a href="/staff/add/" class="btn-accent">+ Add Result</a>
+        <form method="POST" action="/staff/upload-excel/"
+              enctype="multipart/form-data"
+              class="d-flex gap-2 align-items-center">
+            {% csrf_token %}
+            <input type="file" name="excel_file" accept=".xlsx"
+                   class="dark-input"
+                   style="width:auto;padding:6px 12px;font-size:0.82rem;">
+            <button type="submit" class="btn-glass" style="white-space:nowrap;">
+                📤 Upload Excel
+            </button>
+        </form>
+        <form method="POST" action="/staff/delete-all/"
+              onsubmit="return confirm('Delete ALL results? Cannot be undone!')">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger-glass">🗑 Delete All</button>
+        </form>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number">{{ total_students }}</div>
+            <div class="label">Total Students</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number">{{ total_results }}</div>
+            <div class="label">Total Results</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number">{{ all_semesters|length }}</div>
+            <div class="label">Semesters</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number" style="color:var(--green);font-size:1.1rem;">Active</div>
+            <div class="label">System Status</div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="glass-card mb-4" style="padding:16px;">
+    <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
+        <input type="text" name="search" class="dark-input"
+               style="flex:1;min-width:200px;"
+               placeholder="Search by name or register number..."
+               value="{{ search_query }}">
+        <select name="semester" class="dark-select" style="width:180px;">
+            <option value="">All Semesters</option>
+            {% for sem in all_semesters %}
+            <option value="{{ sem }}"
+                {% if selected_sem == sem %}selected{% endif %}>
+                {{ sem }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-accent">Filter</button>
+        <a href="/staff/" class="btn-glass">Clear</a>
+    </form>
+</div>
+
+<!-- Results Table -->
+<div class="glass-card mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="section-title mb-0">
+            Results
+            <span>
+                {% if search_query %}— "{{ search_query }}"{% endif %}
+                {% if selected_sem %}— {{ selected_sem }}{% endif %}
+                ({{ page_obj.paginator.count }} records)
+            </span>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="dark-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Register No</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Semester</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in page_obj %}
+                <tr>
+                    <td style="color:var(--muted);">{{ forloop.counter }}</td>
+                    <td>
+                        <span style="background:var(--glass2);padding:3px 10px;
+                            border-radius:20px;font-size:0.82rem;">
+                            {{ r.student.register_number }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/staff/view-student/{{ r.student.id }}/"
+                           style="color:var(--accent2);text-decoration:none;font-weight:500;">
+                            {{ r.student.name }}
+                        </a>
+                    </td>
+                    <td>{{ r.subject }}</td>
+                    <td>
+                        <strong>{{ r.marks }}</strong>
+                        <span style="color:var(--muted);">/100</span>
+                        <div class="prog-bar">
+                            <div class="prog-fill
+                                {% if r.marks >= 75 %}prog-green
+                                {% elif r.marks >= 50 %}prog-yellow
+                                {% else %}prog-red{% endif %}"
+                                style="width:{{ r.marks }}%">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-grade grade-{{ r.grade }}">{{ r.grade }}</span>
+                    </td>
+                    <td style="color:var(--muted);">{{ r.semester }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/staff/edit/{{ r.id }}/" class="btn-edit">✏️ Edit</a>
+                            <form method="POST" action="/staff/delete/{{ r.id }}/"
+                                  onsubmit="return confirm('Delete this result?')"
+                                  style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-del">🗑</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8"
+                        style="text-align:center;color:var(--muted);padding:40px;">
+                        No results found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="d-flex justify-content-center gap-2 mt-4">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&semester={{ selected_sem }}"
+           class="btn-glass" style="padding:6px 16px;">
+            Prev
+        </a>
+        {% endif %}
+        <span style="padding:6px 14px;color:var(--muted);">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&semester={{ selected_sem }}"
+           class="btn-glass" style="padding:6px 16px;">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Students Table -->
+<div class="glass-card mb-4">
+    <div class="section-title">
+        All Students <span>({{ students|length }} registered)</span>
+    </div>
+    <div class="table-responsive">
+        <table class="dark-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Register No</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Subjects</th>
+                    <th>AI Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td style="color:var(--muted);">{{ forloop.counter }}</td>
+                    <td>
+                        <span style="background:var(--glass2);padding:3px 10px;
+                            border-radius:20px;font-size:0.82rem;">
+                            {{ s.register_number }}
+                        </span>
+                    </td>
+                    <td style="font-weight:500;">{{ s.name }}</td>
+                    <td style="color:var(--muted);">{{ s.department }}</td>
+                    <td>
+                        <span style="background:rgba(124,106,255,0.15);
+                            color:var(--accent2);padding:3px 10px;
+                            border-radius:20px;font-size:0.82rem;">
+                            {{ s.results.count }} subjects
+                        </span>
+                    </td>
+                    <td>
+                        {% if s.aianalysis %}
+                        <span style="background:rgba(16,185,129,0.15);
+                            color:var(--green);padding:3px 10px;
+                            border-radius:20px;font-size:0.82rem;">
+                            Done
+                        </span>
+                        {% else %}
+                        <span style="background:var(--glass2);color:var(--muted);
+                            padding:3px 10px;border-radius:20px;font-size:0.82rem;">
+                            Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/staff/view-student/{{ s.id }}/"
+                               class="btn-view">View</a>
+                            <form method="POST"
+                                  action="/staff/delete-student/{{ s.id }}/"
+                                  onsubmit="return confirm('Delete this student and ALL results?')"
+                                  style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-del">🗑</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7"
+                        style="text-align:center;color:var(--muted);padding:40px;">
+                        No students registered yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Excel Format Hint -->
+<div class="glass-card" style="padding:14px;">
+    <p style="color:var(--muted);font-size:0.82rem;margin:0;">
+        📋 <strong style="color:var(--text);">Excel Upload Format:</strong>
+        Columns in order:
+        <code style="background:var(--glass2);padding:2px 8px;
+            border-radius:4px;color:var(--accent2);">
+            register_number | subject | marks | grade | semester
+        </code>
+        (Row 1 = headers, Row 2+ = data)
+    </p>
+</div>
+
+{% endblock %}

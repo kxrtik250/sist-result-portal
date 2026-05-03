@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a href="/staff/" class="btn-glass btn me-3">← Back</a>
+            <div>
+                <h4 style="color:#e2e8f0;font-weight:700;margin:0;">📤 Upload Excel Results</h4>
+                <p style="color:#94a3b8;font-size:0.85rem;margin:0;">Bulk import student results</p>
+            </div>
+        </div>
+
+        <div class="glass-card mb-4">
+            <h6 style="color:#a78bfa;margin-bottom:12px;">📋 Excel Format Required</h6>
+            <div style="background:rgba(124,111,205,0.08);border-radius:8px;padding:12px;font-family:monospace;font-size:0.85rem;color:#94a3b8;">
+                Column A: Register Number<br>
+                Column B: Subject<br>
+                Column C: Marks (0-100)<br>
+                Column D: Grade (O/A/B/C/F)<br>
+                Column E: Semester (e.g. Semester 1)
+            </div>
+            <p style="color:#94a3b8;font-size:0.8rem;margin-top:10px;margin-bottom:0;">
+                ⚠️ Row 1 is treated as header and skipped automatically.
+            </p>
+        </div>
+
+        <div class="glass-card">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="form-label">Select Excel File (.xlsx)</label>
+                    <input type="file" name="excel_file" accept=".xlsx"
+                           class="dark-input form-control" required>
+                </div>
+                <button type="submit" class="btn-accent btn w-100 py-2">
+                    📤 Upload & Import
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

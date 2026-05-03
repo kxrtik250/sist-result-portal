@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<script>
+const SEMESTER_SUBJECTS = {
+    "Semester 1": [
+        "Technical English",
+        "Matrices and Calculus",
+        "Chemistry",
+        "Electrical and Electronics Engineering",
+        "Programming in C",
+        "Chemistry Lab"
+    ],
+    "Semester 2": [
+        "Advanced Calculus and Statistics",
+        "Physics",
+        "Data Structures",
+        "Programming in Python",
+        "Engineering Drawing and Design",
+        "Physics Lab",
+        "Data Structures Lab"
+    ],
+    "Semester 3": [
+        "Discrete Mathematics and Numerical Methods",
+        "Computer Architecture and Organization",
+        "Universal Human Values",
+        "Theory of Computation",
+        "Digital Logic Circuits",
+        "Microprocessor and Microcontroller",
+        "Programming in Java"
+    ],
+    "Semester 4": [
+        "Probability and Statistics",
+        "Operating Systems and Unix",
+        "Database Management Systems",
+        "Operating Systems Lab",
+        "Design Thinking and Innovations",
+        "Professional Elective 1",
+        "Open Elective 1",
+        "Skill Enhancement Course I"
+    ],
+    "Semester 5": [
+        "Data Communication and Computer Networks",
+        "Design and Analysis of Algorithms",
+        "Software Engineering Design and Development",
+        "Augmented and Virtual Reality",
+        "Computer Networks Lab",
+        "Professional Elective 2",
+        "Open Elective 2",
+        "Professional Training I"
+    ],
+    "Semester 6": [
+        "Compiler Design",
+        "Network Security",
+        "Parallel and Distributed Computing",
+        "Machine Learning",
+        "Compiler Design Lab",
+        "Professional Elective 3",
+        "Open Elective 3",
+        "Professional Training II"
+    ],
+    "Semester 7": [
+        "Artificial Intelligence",
+        "Big Data Analytics",
+        "Project Phase 1",
+        "Management Elective",
+        "Professional Elective 4",
+        "Open Elective 4"
+    ],
+    "Semester 8": [
+        "Project Phase 2",
+        "Professional Elective 5",
+        "Professional Elective 6"
+    ]
+};
+
+function updateSubjects() {
+    const semester = document.getElementById('semester').value;
+    const subjectSelect = document.getElementById('subject');
+    const subjects = SEMESTER_SUBJECTS[semester] || [];
+
+    subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+    subjects.forEach(function(sub) {
+        const opt = document.createElement('option');
+        opt.value = sub;
+        opt.textContent = sub;
+        subjectSelect.appendChild(opt);
+    });
+}
+
+function autoGrade() {
+    const marks = parseInt(document.getElementById('marks').value);
+    const gradeSelect = document.getElementById('grade');
+    if (isNaN(marks)) return;
+    if      (marks >= 91) gradeSelect.value = 'O';
+    else if (marks >= 81) gradeSelect.value = 'A';
+    else if (marks >= 71) gradeSelect.value = 'B';
+    else if (marks >= 61) gradeSelect.value = 'C';
+    else if (marks >= 50) gradeSelect.value = 'D';
+    else                  gradeSelect.value = 'F';
+}
+
+window.onload = function() {
+    updateSubjects();
+};
+</script>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a href="/staff/" class="btn-glass" style="padding:8px 16px;margin-right:16px;">
+                Back
+            </a>
+            <div>
+                <h4 style="font-weight:700;margin:0;">Add Student Result</h4>
+                <p style="color:var(--muted);font-size:0.85rem;margin:4px 0 0;">
+                    Sathyabama CSE — R2023 Curriculum
+                </p>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            {% if error %}
+            <div class="alert-glass" style="margin-bottom:16px;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Register Number -->
+                <div style="margin-bottom:16px;">
+                    <label class="form-label-dark">Register Number</label>
+                    <input type="text" name="register_number"
+                           id="register_number"
+                           class="dark-input"
+                           placeholder="e.g. CS2023001" required>
+                </div>
+
+                <!-- Semester — select first -->
+                <div style="margin-bottom:16px;">
+                    <label class="form-label-dark">Semester</label>
+                    <select name="semester" id="semester"
+                            class="dark-select"
+                            onchange="updateSubjects()" required>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                        <option value="Semester 3">Semester 3</option>
+                        <option value="Semester 4">Semester 4</option>
+                        <option value="Semester 5">Semester 5</option>
+                        <option value="Semester 6">Semester 6</option>
+                        <option value="Semester 7">Semester 7</option>
+                        <option value="Semester 8">Semester 8</option>
+                    </select>
+                </div>
+
+                <!-- Subject — auto-populates based on semester -->
+                <div style="margin-bottom:16px;">
+                    <label class="form-label-dark">Subject</label>
+                    <select name="subject" id="subject"
+                            class="dark-select" required>
+                        <option value="">-- Select Subject --</option>
+                    </select>
+                </div>
+
+                <!-- Marks -->
+                <div style="margin-bottom:16px;">
+                    <label class="form-label-dark">Marks (out of 100)</label>
+                    <input type="number" name="marks" id="marks"
+                           class="dark-input"
+                           min="0" max="100"
+                           placeholder="Enter marks 0-100"
+                           oninput="autoGrade()" required>
+                </div>
+
+                <!-- Grade — auto-fills based on marks -->
+                <div style="margin-bottom:24px;">
+                    <label class="form-label-dark">Grade</label>
+                    <select name="grade" id="grade" class="dark-select">
+                        <option value="O">O (91-100)</option>
+                        <option value="A">A (81-90)</option>
+                        <option value="B">B (71-80)</option>
+                        <option value="C">C (61-70)</option>
+                        <option value="D">D (50-60)</option>
+                        <option value="F">F (Below 50)</option>
+                    </select>
+                    <p style="color:var(--muted);font-size:0.75rem;margin-top:4px;">
+                        Grade auto-fills when you enter marks
+                    </p>
+                </div>
+
+                <button type="submit" class="btn-accent"
+                        style="width:100%;padding:12px;">
+                    Add Result
+                </button>
+            </form>
+        </div>
+
+        <!-- Semester Info Card -->
+        <div class="glass-card" style="margin-top:16px;padding:16px;">
+            <p style="color:var(--muted);font-size:0.78rem;margin:0;">
+                📋 <strong style="color:var(--text);">Sathyabama CSE R2023:</strong>
+                Select semester first — subjects auto-load from official curriculum.
+                Marks entry auto-assigns grade as per university grading system.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

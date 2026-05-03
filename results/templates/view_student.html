@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.border-green  { border-left: 3px solid var(--green) !important; }
+.border-yellow { border-left: 3px solid var(--yellow) !important; }
+.border-red    { border-left: 3px solid var(--red) !important; }
+.status-green  { background:rgba(16,185,129,0.15); color:var(--green); }
+.status-yellow { background:rgba(245,158,11,0.15);  color:var(--yellow); }
+.status-red    { background:rgba(239,68,68,0.15);   color:var(--red); }
+.suggestion-row {
+    background: rgba(255,255,255,0.03);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+</style>
+
+<!-- Header -->
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a href="/staff/" class="btn-glass" style="padding:8px 16px;">Back</a>
+    <div>
+        <h4 style="font-weight:700;margin:0;">{{ student.name }}</h4>
+        <p style="color:var(--muted);font-size:0.85rem;margin:4px 0 0;">
+            📋 {{ student.register_number }} &nbsp;|&nbsp; 🏛 {{ student.department }}
+        </p>
+    </div>
+</div>
+
+<!-- Student Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number" style="color:var(--accent2);">{{ cgpa }}</div>
+            <div class="label">CGPA / 10</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number">{{ results|length }}</div>
+            <div class="label">Total Subjects</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number">{{ semesters|length }}</div>
+            <div class="label">Semesters</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="number" style="font-size:1.1rem;color:var(--green);">
+                {% if analysis %}{{ analysis.performance }}{% else %}N/A{% endif %}
+            </div>
+            <div class="label">Performance</div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="glass-card mb-4">
+    <div class="section-title">📊 All Results</div>
+    <div class="table-responsive">
+        <table class="dark-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Grade Point</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in results_with_gp %}
+                <tr>
+                    <td>📚 {{ item.result.subject }}</td>
+                    <td>
+                        <strong>{{ item.result.marks }}</strong>
+                        <span style="color:var(--muted);">/100</span>
+                        <div class="prog-bar">
+                            <div class="prog-fill
+                                {% if item.result.marks >= 75 %}prog-green
+                                {% elif item.result.marks >= 50 %}prog-yellow
+                                {% else %}prog-red{% endif %}"
+                                style="width:{{ item.result.marks }}%">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-grade grade-{{ item.result.grade }}">
+                            {{ item.result.grade }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong style="color:var(--accent2);">{{ item.grade_point }}</strong>
+                        <span style="color:var(--muted);">/10</span>
+                    </td>
+                    <td style="color:var(--muted);">{{ item.result.semester }}</td>
+                    <td>
+                        <span class="badge-grade
+                            {% if item.result.marks >= 75 %}status-green
+                            {% elif item.result.marks >= 50 %}status-yellow
+                            {% else %}status-red{% endif %}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/staff/edit/{{ item.result.id }}/"
+                               class="btn-edit">✏️ Edit</a>
+                            <form method="POST"
+                                  action="/staff/delete/{{ item.result.id }}/"
+                                  onsubmit="return confirm('Delete this result?')"
+                                  style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-del">🗑</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7"
+                        style="text-align:center;color:var(--muted);padding:40px;">
+                        No results added for this student yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- AI Analysis -->
+{% if analysis %}
+<div class="ai-box">
+    <h5>🤖 AI Analysis</h5>
+    <hr style="border-color:rgba(16,185,129,0.2);margin:12px 0;">
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <p style="color:var(--muted);font-size:0.75rem;font-weight:600;
+               text-transform:uppercase;margin-bottom:4px;">Overall CGPA</p>
+            <p style="font-size:1.8rem;font-weight:700;color:var(--green);margin:0;">
+                {{ cgpa }}
+                <span style="font-size:1rem;color:var(--muted);"> / 10</span>
+            </p>
+        </div>
+        <div class="col-md-3">
+            <p style="color:var(--muted);font-size:0.75rem;font-weight:600;
+               text-transform:uppercase;margin-bottom:4px;">Performance</p>
+            <p style="font-size:1.1rem;font-weight:600;margin:0;">
+                {{ analysis.performance }}
+            </p>
+        </div>
+        <div class="col-md-3">
+            <p style="color:var(--muted);font-size:0.75rem;font-weight:600;
+               text-transform:uppercase;margin-bottom:4px;">Overall Grade</p>
+            <p style="font-size:1.1rem;font-weight:600;margin:0;">
+                {{ analysis.overall_grade }}
+            </p>
+        </div>
+        <div class="col-md-3">
+            <p style="color:var(--muted);font-size:0.75rem;font-weight:600;
+               text-transform:uppercase;margin-bottom:4px;">Predicted CGPA</p>
+            <p style="font-size:1.1rem;font-weight:600;color:var(--accent2);margin:0;">
+                {{ analysis.predicted_cgpa|default:"N/A" }} / 10
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div style="background:rgba(16,185,129,0.08);border:1px solid
+                rgba(16,185,129,0.15);border-radius:10px;padding:14px;">
+                <p style="color:var(--muted);font-size:0.75rem;margin-bottom:4px;">
+                    💪 STRENGTHS
+                </p>
+                <p style="font-weight:600;margin:0;">
+                    {{ analysis.strengths|default:"Keep improving all subjects" }}
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div style="background:rgba(239,68,68,0.06);border:1px solid
+                rgba(239,68,68,0.15);border-radius:10px;padding:14px;">
+                <p style="color:var(--muted);font-size:0.75rem;margin-bottom:4px;">
+                    ⚠️ WEAK SUBJECT
+                </p>
+                <p style="font-weight:600;margin:0;">{{ analysis.weak_subject }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="background:rgba(124,106,255,0.08);border:1px solid
+        rgba(124,106,255,0.2);border-radius:10px;padding:14px;margin-bottom:16px;">
+        <p style="color:var(--muted);font-size:0.75rem;margin-bottom:4px;">
+            💡 AI SUGGESTION
+        </p>
+        <p style="margin:0;font-weight:500;">{{ analysis.suggestion }}</p>
+    </div>
+
+    {% if results_with_gp %}
+    <p style="color:var(--muted);font-size:0.75rem;font-weight:600;
+       text-transform:uppercase;margin-bottom:10px;">
+        📚 Subject-wise Study Plan
+    </p>
+    {% for item in results_with_gp %}
+    {% if item.suggestion %}
+    <div class="suggestion-row
+        {% if item.result.marks >= 75 %}border-green
+        {% elif item.result.marks >= 50 %}border-yellow
+        {% else %}border-red{% endif %}">
+        <span style="font-weight:600;">{{ item.result.subject }}</span>
+        <span class="badge-grade grade-{{ item.result.grade }}"
+              style="margin-left:8px;">
+            {{ item.result.grade }}
+        </span>
+        <span style="color:var(--accent2);font-size:0.82rem;margin-left:6px;">
+            {{ item.grade_point }}/10 GP
+        </span>
+        <br>
+        <span style="color:var(--muted);font-size:0.85rem;">
+            💡 {{ item.suggestion }}
+        </span>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
+{% else %}
+<div class="glass-card"
+     style="text-align:center;padding:40px;color:var(--muted);">
+    🤖 AI analysis will appear once results are added for this student.
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center" style="margin-top:50px;">
+    <div class="col-md-5">
+        <div class="text-center mb-4">
+            <h4 style="font-weight:700;">🎓 Student Registration</h4>
+<p style="color:var(--muted);font-size:0.9rem;">Sathyabama Institute of Science and Technology</p>
+        <div class="glass-card">
+            {% if error %}
+            <div class="alert-glass">⚠️ {{ error }}</div>
+            {% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label-dark">Full Name</label>
+                    <input type="text" name="name" class="dark-input" placeholder="Your full name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Register Number</label>
+                    <input type="text" name="register_number" class="dark-input" placeholder="e.g. CS2023001" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Department</label>
+                    <input type="text" name="department" class="dark-input" placeholder="e.g. Computer Science" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Username</label>
+                    <input type="text" name="username" class="dark-input" placeholder="Choose a username" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label-dark">Password</label>
+                    <input type="password" name="password" class="dark-input" placeholder="Min 6 characters" required>
+                </div>
+                <button type="submit" class="btn-accent w-100 py-2">Create Account →</button>
+            </form>
+            <p style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:20px;">
+                Already registered?
+                <a href="/" style="color:var(--accent2);text-decoration:none;font-weight:600;">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

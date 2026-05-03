@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a href="/staff/" class="btn btn-light me-3">← Back</a>
+            <div>
+                <h4 class="fw-bold mb-0">✏️ Edit Result</h4>
+                <p class="text-muted small mb-0">
+                    {{ result.student.name }} — {{ result.student.register_number }}
+                </p>
+            </div>
+        </div>
+        <div class="card p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label text-muted small">SUBJECT</label>
+                    <input type="text" name="subject" class="form-control"
+                           value="{{ result.subject }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">MARKS (out of 100)</label>
+                    <input type="number" name="marks" class="form-control"
+                           value="{{ result.marks }}" min="0" max="100" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">GRADE</label>
+                    <select name="grade" class="form-select">
+                        {% for g in "OABCF" %}
+                        <option {% if result.grade == g %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-muted small">SEMESTER</label>
+                    <select name="semester" class="form-select">
+                        {% for i in "12345678" %}
+                        <option {% if result.semester == "Semester "|add:i %}selected{% endif %}>
+                            Semester {{ i }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    💾 Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
