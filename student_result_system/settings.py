@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-GEMINI_API_KEY = 'AIzaSyBKF3zD9rK3O5aXuBE7KhkGz6nfvcEjV8E'
+GEMINI_API_KEY = 'AIzaSyDufgln_UKHdqQ2o1ZXwGIkXLencN2mQDI'
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
