@@ -266,7 +266,10 @@ def generate_ai_analysis(student):
         )
         genai.configure(api_key=settings.GEMINI_API_KEY)
         model    = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(prompt)
+        response = model.generate_content(
+    prompt,
+    generation_config={"max_output_tokens": 200}
+)
         for line in response.text.strip().split('\n'):
             line = line.strip()
             if line.startswith("Performance:"):

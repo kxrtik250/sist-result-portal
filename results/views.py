@@ -411,24 +411,27 @@ def upload_excel(request):
         try:
             import openpyxl
         except ImportError:
-            messages.error(request, 'Excel library not installed. Run: pip install openpyxl')
+            messages.error(request, 'Run: pip install openpyxl')
             return redirect('staff_dashboard')
 
         excel_file = request.FILES['excel_file']
         if not excel_file.name.endswith('.xlsx'):
             messages.error(request, 'Please upload a valid .xlsx file.')
             return redirect('staff_dashboard')
+
         try:
             wb            = openpyxl.load_workbook(excel_file)
             ws            = wb.active
             success_count = 0
             error_list    = []
+            updated_students = set()
+
             for i, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                 if not any(row):
                     continue
                 try:
                     reg_no, subject, marks, grade, semester = row[:5]
-                    marks   = int(marks)
+                    marks = int(marks)
                     if not (0 <= marks <= 100):
                         raise ValueError("Marks out of range")
                     student = Student.objects.get(
@@ -441,7 +444,7 @@ def upload_excel(request):
                         grade    = str(grade).strip(),
                         semester = str(semester).strip(),
                     )
-                    generate_ai_analysis(student)
+                    updated_students.add(student.id)
                     success_count += 1
                 except Student.DoesNotExist:
                     error_list.append(
@@ -450,12 +453,24 @@ def upload_excel(request):
                 except Exception as e:
                     error_list.append(f"Row {i}: {str(e)}")
 
+            # Run AI analysis ONCE per student AFTER all rows uploaded
+            from .ai_helper import generate_ai_analysis
+            for student_id in updated_students:
+                try:
+                    student = Student.objects.get(id=student_id)
+                    generate_ai_analysis(student)
+                except Exception:
+                    pass  # Don't fail upload if AI fails
+
             if success_count:
                 messages.success(
-                    request, f'{success_count} results uploaded successfully!'
+                    request,
+                    f'{success_count} results uploaded! AI analysis generated for {len(updated_students)} students.'
                 )
             for err in error_list[:5]:
                 messages.error(request, err)
+
         except Exception as e:
             messages.error(request, f'Failed to read file: {str(e)}')
+
     return redirect('staff_dashboard')
