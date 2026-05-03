@@ -1,3 +1,4 @@
+import os
 """
 Django settings for student_result_system project.
 
